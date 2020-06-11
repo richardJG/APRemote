@@ -1,0 +1,168 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+    "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+<title>Auto Pilot Remote</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+   <table id="t1">
+      <tr>
+         <td colspan=3>
+            <table id="t4"><tr><td id="hdgInfo" align="middle">>>1.2Nm</td></tr></table>
+         </td>
+      <tr>
+         <td id="left" align="middle" width="15%">></td>
+         <td align="middle"><span id="CTS">76</span>&deg; M</td>
+         <td id="right" align="middle" width="15%"><</td>
+      </tr>
+  </table>
+  <br>
+  <table id="t2" >
+    <tr>
+      <td>Standby</td>
+      <td>Auto</td>
+      <td>Wind</td>
+      <td>Track</td>
+    </tr>
+    <tr>
+      <td align="center"><span id="LED0"> </span></td>
+      <td align="center"><span id="LED1"> </span></td>
+      <td align="center"><span id="LED2"> </span></td>
+      <td align="center"><span id="LED3"> </span></td>
+    </tr>
+   </table>
+   <br>
+  <table>
+    <tr>
+      <td align="center">To Port</td>
+      <td align="center"><button class="button" ontouchstart="onPress('0');" width=80%>Standby</button></td>
+      <td align="center">To Stbd</td>
+    </tr>
+    <tr><td> </td></tr>
+      <tr>
+         <td align="center"><button class="button" ontouchstart="onPress('1');">-1</button></td>
+         <td align="center"><button class="button" ontouchstart="onPress('2');">Auto</button></td>
+         <td align="center"><button class="button" ontouchstart="onPress('3');">+1</button></td>
+      </tr>
+      <tr><td> </td></tr>
+      <tr>
+         <td align="center"><button class="button" ontouchstart="onPress('4');">-10</button></td>
+         <td align="center"><button class="button" ontouchstart="onPress('5');">Wind</button></td>
+         <td align="center"><button class="button" ontouchstart="onPress('6');">+10</button></td>
+      </tr>
+      <tr><td> </td></tr>
+      <tr>
+         <td align="center"><button class="button" ontouchstart="onPress('7');">Tack</button></td>
+         <td align="center"><button class="button" ontouchstart="onPress('8');">Track</button></td>
+         <td align="center"><button class="button" ontouchstart="onPress('9');">Tack</button></td>
+      </tr>
+   </table>
+   <br>
+  <table id="t3" align="center">
+    <tr>
+      <td align="middle">HDG</td>
+      <td align="middle">COG</td>
+      <td align="middle">SOG</td>
+      <td align="middle">AWA</td>
+      <td align="middle">XTE</td>
+      <td align="middle">RSA</td>
+    </tr>
+    <tr>
+      <td align="middle" id="HDG">359</td>
+      <td align="middle" id="COG">359</td>
+      <td align="middle" id="SOG">10.0</td>
+      <td align="middle" id="AWA">P50</td>
+      <td align="middle" id="XTE">1.2</td>
+      <td align="middle" id="RSA">S5</td>
+    </tr>
+    <tr>
+      <td align="middle">DPT</td>
+      <td align="middle">STW</td>
+      <td align="middle">VLW</td>
+      <td align="middle">AWS</td>
+      <td align="middle">BTW</td>
+      <td align="middle">DTW</td>
+    </tr>
+    <tr>
+      <td align="middle" id="DPT">6.2</td>
+      <td align="middle" id="STW">180</td>
+      <td align="middle" id="VLW"></td>
+      <td align="middle" id="AWS">14.5</td>
+      <td align="middle" id="BTW"></td>
+      <td align="middle" id="DTW"></td></td>
+    </tr>
+   </table>
+   <table align="center">
+      <tr>
+         <td color="red" align="middle">
+            <span id="alarm"> </span>
+         </td>
+      </tr>
+    </table>
+    
+    
+<script>
+
+   var url = "ws://192.168.1.187:1337/";
+   // request data updates every 1000 milliseconds
+   setInterval(requestData, 1000);
+   wsConnect(url);
+
+function requestData() {
+
+   var xhr = new XMLHttpRequest();
+   xhr.open('GET', 'getData');
+
+   xhr.onload = function() {
+     if (xhr.status === 200) {
+       if (xhr.responseText) { // if the returned data is not null, update the values
+          var data = JSON.parse(xhr.responseText);
+
+          document.getElementById("CTS").innerText = data.cts;
+
+          document.getElementById("LED0").innerHTML = "<div class=\"" + data.led0 + "\"></div>";
+          document.getElementById("LED1").innerHTML = "<div class=\"" + data.led1 + "\"></div>";
+          document.getElementById("LED2").innerHTML = "<div class=\"" + data.led2 + "\"></div>";
+          document.getElementById("LED3").innerHTML = "<div class=\"" + data.led3 + "\"></div>";
+
+          document.getElementById("HDG").innerText = data.hdg;
+          document.getElementById("RSA").innerText = data.rsa;  
+          document.getElementById("COG").innerText = data.cog;
+          document.getElementById("SOG").innerText = data.sog;
+          document.getElementById("AWA").innerText = data.awa;
+          document.getElementById("AWS").innerText = data.aws;
+          document.getElementById("DPT").innerText = data.dpt;
+          document.getElementById("STW").innerText = data.stw;
+          document.getElementById("XTE").innerText = data.xte;
+          document.getElementById("BTW").innerText = data.btw;
+          document.getElementById("DTW").innerText = data.dtw;
+          document.getElementById("VLW").innerText = data.vlw;
+          
+          document.getElementById("left").innerHTML = data.left;
+          document.getElementById("right").innerHTML = data.right;
+          document.getElementById("hdgInfo").innerHTML = data.hdgInfo;
+          document.getElementById("alarm").innerText = data.alm;
+        } 
+     }
+   };
+   xhr.send();
+}
+
+// Call this to connect to the WebSocket server
+function wsConnect(url) {
+    
+    // Connect to WebSocket server
+    websocket = new WebSocket(url);
+}
+// Called whenever the HTML button is pressed
+function onPress(msg) {
+    websocket.send(msg);
+}
+
+
+</script>
+   
+ </body>
+</html>

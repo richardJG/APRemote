@@ -1,0 +1,90 @@
+body, html, table {
+  font-family: sans-serif;
+  margin-left: auto;
+  margin-right: auto;
+  align-items: center;
+  width: 95%;
+  background-color: grey;
+  border: none;
+}
+
+.button {
+  display: inline-block;
+  padding: 8px 8px;
+  font-size: 30px;
+  width: 95%;
+  height: 85%;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  outline: none;
+  color: #fff;
+  background-color: #65686e;
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 5px #999;
+}
+
+.button:active {
+  background-color: #7090c0;
+  box-shadow: 0 3px #666;
+  transform: translateY(2px);
+} 
+
+#t1 {
+   border: 6px;
+   font-family: sans-serif;
+   font-size: 200%;
+   border-style: inset;
+   height: 25%;
+   width: 70%;
+   background-color: #8f9194;
+}
+ 
+#t2 {
+
+    width: 75%;
+    text-align: center;
+    font-size: medium;
+    font-family: sans-serif;
+    border: 1px;
+    border-style: solid;
+    border-color: #525354;
+}
+
+#t3 {
+   border: 6px;
+   font-family: sans-serif;
+   font-size: medium;
+   border-style: inset;
+   height: 25%;
+   width: 98%;
+   background-color: #8f9194;
+}
+#t4 {
+  font-size: 15px;
+  background-color: #8f9194;
+  border:1px;
+}
+
+.led_on {
+  height: 18px;
+  width: 18px;
+  background-color: #05a020;
+  border-radius: 50%;
+  border: 2px;
+  border-style: solid;
+  border-color: #363636;
+}
+
+
+.led_off {
+  height: 18px;
+  width: 18px;
+  background-color: #3d453f;
+  border-radius: 50%;
+  border: 2px;
+  border-style: solid;
+  border-color: #363636;}
+
+  
