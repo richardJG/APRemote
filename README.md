@@ -1,5 +1,5 @@
 # APRemote
-WEb based autopilot control using ESP32 and Seatalk1
+Web based autopilot control using ESP32 and Seatalk1
 
 ESP32 sketch on Arduino IDE. Reads and writes Seatalk1 to display data and send AP commannds to control X10 smart pilot.
 
