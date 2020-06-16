@@ -122,17 +122,17 @@ void getData(AsyncWebServerRequest *request) {
 
   if(xteValid){
     xteUnit = " Nm";
-    if(abs(xte) < 0.16){
-      xte = (int)(6076 * xte);  //convert to feet
+    if(abs(xte) < 160){
       xteUnit = " Ft";
-      sXTE = ">>" + String(xte, 0) + xteUnit;
+      sXTE = ">>" + String(xte * 6, 0) + xteUnit;
       if(xte < 0){
-        sXTE = String(abs(xte), 0) + xteUnit + "<<";
+        sXTE = String(abs(xte * 6), 0) + xteUnit + "<<";
       }
      } else {
-      sXTE = ">>" + String(xte, 1) + xteUnit;
+      
+      sXTE = ">>" + String(xte / 1000, 1) + xteUnit;
       if(xte < 0){
-        sXTE = String(abs(xte), 1) + xteUnit + "<<";
+        sXTE = String(abs(xte / 1000), 1) + xteUnit + "<<";
       }
     }
   }
@@ -240,8 +240,8 @@ void getData(AsyncWebServerRequest *request) {
   APdata += ",\"alm\":\"" + sALM + "\"";
   APdata += "}";
 
-  Serial.print(APdata.length());
-  Serial.println(APdata);
+//  Serial.print(APdata.length());
+//  Serial.println(APdata);
 
  
   request->send(200, "text/plain", APdata); //Send ADC value only to client ajax request
@@ -414,9 +414,17 @@ void readST(void *pvParameters)
         cmdCount = (b & 0x000F) + 3;    // cmd + byte count + mandatory 1st field
       }
       if((cmdCount == bufCount) && (cmdCount > 2)){
-          working = true;
+        working = true;
+/*        
+        for(i = 0; i < cmdCount; i++){
+          Serial.print(stBuff[i], HEX);
+          Serial.print(" ");
+        }
+        Serial.print("\n\r");
+*/
 
         switch (stBuff[0]) {
+
           case 0x86 :
             // autopilot command sentance
             Serial.print("Rxd  AP Command :");
@@ -466,11 +474,6 @@ void readST(void *pvParameters)
           break;
           case 0x84 :
             /*
-              for(i = 0; i < cmdCount; i++){
-                Serial.print(stBuff[i], HEX);
-                Serial.print(", ");
-              }
-              Serial.print("\n\r");
             */
             /*
             * got AP info so process out info we need
@@ -530,6 +533,7 @@ void readST(void *pvParameters)
                 dir = -1;
               }
             }
+            
             if (stBuff[6] > 127) {
               // negative
               rsa = 0.0 - (float)(256 - stBuff[6]);
@@ -540,17 +544,17 @@ void readST(void *pvParameters)
 
             
             u = stBuff[1] >> 4;
-            hdg = ((u & 0x03) * 90) + (stBuff[2] & 0x3f) * 2 + ((u & 0x0c) ? ((u > 8) ? 2 : 1) : 0);
+            hdg = ((u & 0x03) * 90) + (stBuff[2] & 0x3f) * 2;
+            if((u & 0x4) == 0x4){
+              hdg++;
+            }
             if((hdg < 0) || (hdg > 360)){
               hdg = 0;
             }
 
             u = stBuff[2] >> 6;
             cts = u * 90 + (stBuff[3] / 2);
-            if (stBuff[3] && 0x01){
-              cts += 1; 
-            }
-            
+
             apAlarm = 0;
             if((stBuff[5] &  0x04) == 0x04){
               apAlarm = 1;
@@ -587,7 +591,7 @@ void readST(void *pvParameters)
              */
              dpt = (stBuff[4] * 256 + stBuff[3]) * 0.3077 / 10.0;
         
-         break;
+          break;
           case 0x25 :   // trip
             /*
              *   0   1   2   3   4   5  6
@@ -598,14 +602,14 @@ void readST(void *pvParameters)
             vlw = (stBuff[4] + stBuff[5] * 256 + (stBuff[6] & 0x0f) * 65536) / 100.0;
           break;
 
-         case 0x11 : // Apparent Wind Speed
+          case 0x11 : // Apparent Wind Speed
             /*
-           *  0  1  2  3
-           * 11 01 xx 0y     xx & 0x7F + yy & 0x0F/ 10 
-           */
+            *  0  1  2  3
+            * 11 01 xx 0y     xx & 0x7F + yy & 0x0F/ 10 
+            */
 
-          aws = (float)(stBuff[2] & 0x7F) + (stBuff[3] &  0x0F) / 2.0;
-        break;
+            aws = (float)(stBuff[2] & 0x7F) + (stBuff[3] &  0x0F) / 2.0;
+          break;
 
           case 0x10 : // ApparentWind Angle - appears always to come before 11 - AWS
             /*
@@ -674,52 +678,56 @@ void readST(void *pvParameters)
              *          XTE = (bc * 256 + a)/ 100
              *          
              */
-            for(i = 0; i < cmdCount; i++){
-              Serial.print(stBuff[i], HEX);
-              Serial.print(" ");
-            }
-            Serial.print("\n\r");
-             btw = (stBuff[3] & 0x03) * 90 + ((stBuff[4] & 0x0f) * 16 + (stBuff[3] >> 4)) / 2;
 
-             ui16 =(stBuff[5] * 16) + (stBuff[4] >> 4);
+             xteValid = ((stBuff[6] & 0x01) == 1);
+            btw = (stBuff[3] & 0x03) * 90 + ((stBuff[4] & 0x0f) * 16 + (stBuff[3] >> 4)) / 2;
+
+            ui16 =(stBuff[5] * 16) + (stBuff[4] >> 4);
             
-             if( (stBuff[6] & 0x10) == 0x10 ){
+            if( (stBuff[6] & 0x10) == 0x10 ){
               dtw = ui16 /100.0;
-             }
-             else {
+            }
+            else {
               dtw = ui16 / 10.0;
-             }
+            }
              
-             if((stBuff[6] & 0x01) == 0x01){
-               xteValid = true;
-               xte = ((stBuff[2] * 16) + (stBuff[1] >> 4) & 0x0f) / 100;
-               if((stBuff[6] & 0x40) == 0){
-                  xte = 0.0 - xte;
-               }
+            if((stBuff[6] & 0x02) == 0x02){
+              btwValid = true;
              }
-             else{
-               xteValid = false;
-               xte = 0.0;
-             }
-             if((stBuff[6] & 0x02) == 0x02){
-                btwValid = true;
-             }
-             else {
+            else {
                 btwValid = false;
+            }
+          break;
+          case 0xAC :
+            /*   
+             *      XTE
+             *      AC K2 XX YY CS
+             *      K & 1 = 1 steer left
+             *            = 0 steer right
+             *      K & 2 = 2 XTE valid
+             *      xte = YYXX / 1000
+             */
+             
+ //           xteValid = ((stBuff[1] & 0x20) == 0x20);
+            if( xteValid ){
+              xte = (stBuff[3] * 256 + stBuff[2]);
+              if((stBuff[1] & 0x10) == 0){
+               xte = 0.0 - xte;
              }
-           break;
-           default : // all the rest
-             // reset command buffer
-             for(i = 0; i < cmdCount; i++){
-               stBuff[i] = 0;
-             }
-           break;
-         }
-       // we've read all chars in this command so reset pointers - ready to start again
-       bufCount= 0;
-       bCmd = false;
-       cmdCount = 0;
-       working = false;
+            }
+          break;
+          default : // all the rest
+            // reset command buffer
+            for(i = 0; i < cmdCount; i++){
+              stBuff[i] = 0;
+            }
+          break;
+        }
+        // we've read all chars in this command so reset pointers - ready to start again
+        bufCount= 0;
+        bCmd = false;
+        cmdCount = 0;
+        working = false;
        }
      }
    }
