@@ -72,7 +72,7 @@ body, html, table {
   width: 18px;
   background-color: #05a020;
   border-radius: 50%;
-  border: 2px;
+  border: 1px;
   border-style: solid;
   border-color: #363636;
 }
@@ -83,7 +83,7 @@ body, html, table {
   width: 18px;
   background-color: #3d453f;
   border-radius: 50%;
-  border: 2px;
+  border: 1px;
   border-style: solid;
   border-color: #363636;}
 

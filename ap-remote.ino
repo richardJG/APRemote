@@ -106,7 +106,7 @@ void getData(AsyncWebServerRequest *request) {
   L4 = "led_off";
 
   switch(dir){
-    case -1 :
+    case 1 :
       sLeft = "<";
       sRight = "&nbsp;";
     break;
@@ -114,7 +114,7 @@ void getData(AsyncWebServerRequest *request) {
       sLeft ="&nbsp;";
       sRight = "&nbsp;";
     break;
-    case 1 :
+    case -1 :
       sLeft ="&nbsp;";
       sRight = ">";
     break;
