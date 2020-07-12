@@ -7,6 +7,15 @@
 #include <ESPAsyncWebServer.h>
 #include <WebSocketsServer_Generic.h>
 #include <SPIFFS.h>
+#include "credentials.h"
+
+/*
+ * 
+ * credentials.h has two lines as below to define the network credentials to
+ * log into
+const char * ssid = "Your_SSID_name";
+const char * password = "Your SSID password";
+*/
 
 #define MAX_BUF_SIZE 20
 #define RX_IN 14
@@ -32,11 +41,6 @@ int dir;              // direction to steer
 uint8_t apAlarm;
 uint8_t newCmd;
    
-
-const char * ssid = "JUSTINEG";
-const char * password = "mil4967d5w";
-// const char * ssid = "APRemote";
-// const char * password = "Ju5t1neG";
 
 AsyncWebServer server(80);
 WebSocketsServer webSocket(1337);
@@ -130,9 +134,9 @@ void getData(AsyncWebServerRequest *request) {
       }
      } else {
       
-      sXTE = ">>" + String(xte / 1000, 1) + xteUnit;
+      sXTE = ">>" + String(xte / 1000, 2) + xteUnit;
       if(xte < 0){
-        sXTE = String(abs(xte / 1000), 1) + xteUnit + "<<";
+        sXTE = String(abs(xte / 1000), 2) + xteUnit + "<<";
       }
     }
   }
@@ -379,7 +383,7 @@ void readST(void *pvParameters)
       continue;
 
     b = mySerial.read();
-    if ((mySerial.readParity())){
+    if ((mySerial.readParity())){  // if parity set then this byte is a command byte
 
       if (bCmd && (cmdCount > 0)){
         if((stBuff[0] == 0x86) && (cmd >= 0)){
@@ -398,6 +402,7 @@ void readST(void *pvParameters)
           Serial.print("\n\r");
         }
       }
+      // reset counters for processing this command
       bCmd = true;
       bufCount = 0;
       cmdCount = 0;
@@ -414,6 +419,7 @@ void readST(void *pvParameters)
         cmdCount = (b & 0x000F) + 3;    // cmd + byte count + mandatory 1st field
       }
       if((cmdCount == bufCount) && (cmdCount > 2)){
+        // received all the chars for command so start processing it
         working = true;
 /*        
         for(i = 0; i < cmdCount; i++){
